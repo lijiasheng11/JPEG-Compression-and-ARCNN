@@ -1,1 +1,1 @@
-# Jpeg-Compression-and-ARCNN
+# JPEG-Compression-and-ARCNN
