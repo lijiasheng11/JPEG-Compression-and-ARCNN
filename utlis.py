@@ -67,7 +67,7 @@ def zigzag_points(rows, cols):
     # True when moving up-right, False when moving down-left
     move_up = True
 
-    for i in range(rows * cols):
+    for _ in range(rows * cols):
         yield point
         if move_up:
             if inbounds(move(UP_RIGHT, point)):
@@ -91,25 +91,60 @@ def zigzag_points(rows, cols):
 def block2zigzag(block):
     return np.array([block[point] for point in zigzag_points(*block.shape)])
 
+def zigzag2block(n_rows, n_cols, zigzag):
+    block = np.zeros((n_rows, n_cols), np.int32)
+    for i, point in enumerate(zigzag_points(n_rows, n_cols)):
+        block[point] = zigzag[i]
+    return block
+
+def RLC(arr):
+    last_nonzero = -1
+    for i, elem in enumerate(arr):
+        if elem != 0:
+            last_nonzero = i
+    symbols, values, counter = [], [], 0
+    for i,elem in enumerate(arr):
+        if i > last_nonzero:
+            symbols.append((0,0))
+            values.append(0)
+            break
+        elif elem ==0 and counter < 15:
+            counter += 1
+        else:
+            size = bits_required(elem)
+            symbols.append((counter, size))
+            values.append(elem)
+            counter = 0
+    return symbols, values
+
 def int2binstr(x, length):
     return bin(x)[2:][-length:].zfill(length)
+
+def binstr2int(binstr):
+    if not set(binstr).issubset('01'):
+        raise ValueError("binstr should have only '0's and '1's")
+    return int(binstr, 2)
 
 # functions for VLI
 
 def bits_required(x):
     x = abs(x)
-    return 0 if x is 0 else len(bin(x)[2:])
+    return 0 if x == 0 else len(bin(x)[2:])
 
 def binstrFlip(s):
     if not set(s).issubset('01'):
         raise ValueError("binstr should have only '0's and '1's")
-    return ''.join(map(lambda a: '0' if a is '1' else '0', s))
+    return ''.join(map(lambda a: '0' if a == '1' else '1', s))
 
 def int2VLI(x):
-    if x is 0:
+    if x == 0:
         return ''
     binstr = bin(abs(x))[2:]
     if x < 0:
-        binstrFlip(binstr)
+        binstr = binstrFlip(binstr)
     return binstr
 
+def VLI2int(binstr):
+    if len(binstr) == 0:
+        return 0
+    return binstr2int(binstr) if binstr[0] == '1' else -binstr2int(binstrFlip(binstr))

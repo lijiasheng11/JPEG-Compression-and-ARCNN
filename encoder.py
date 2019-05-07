@@ -7,76 +7,9 @@ import skimage
 
 from utlis import *
 from huffman import HuffmanTree
+import JpegIO
 
-def RLC(arr):
-    last_nonzero = -1
-    for i, elem in enumerate(arr):
-        if elem != 0:
-            last_nonzero = i
-    symbols, values, counter = [], [], 0
-    for i,elem in enumerate(arr):
-        if i > last_nonzero:
-            symbols.append((0,0))
-            values.append(0)
-            break
-        elif elem ==0 and counter < 15:
-            counter += 1
-        else:
-            size = bits_required(elem)
-            symbols.append((counter, size))
-            values.append(elem)
-            counter = 0
-    return symbols, values
-
-def writefile(dc, ac, n_blocks, tables, filepath='./comp.dat'):
-    filestr = ''
-    for table_name in ['dc_y', 'ac_y', 'dc_c', 'ac_c']:
-        # 16 bits for 'table size'
-        filestr+=int2binstr(len(tables[table_name]), 16)
-        for key, value in tables[table_name].items():
-            if table_name in {'dc_y', 'dc_c'}:
-                # 4 bits for the 'category'
-                # 4 bits for 'code_length'
-                # 'code_length' bits for 'huffman_code'
-                filestr += int2binstr(key, 4)
-                filestr += int2binstr(len(value), 4)
-                filestr += value
-            else: 
-                # 4 bits for 'run_length'
-                # 4 bits for 'size'
-                # 8 bits for 'code_length'
-                # 'code _length' bits for 'huffman_code'
-                filestr += int2binstr(key[0], 4)
-                filestr += int2binstr(key[1], 4)
-                filestr += int2binstr(len(value), 8)
-                filestr += value
-
-    # 32 bits for 'n_blocks'
-    filestr += int2binstr(n_blocks, 32)
-    for b in range(n_blocks):
-        for c in range(3):
-            category = bits_required(dc[b, c])
-            symbols, values = RLC(ac[b, :, c])
-            dc_table = tables['dc_y'] if c == 0 else tables['dc_c']
-            ac_table = tables['ac_y'] if c == 0 else tables['ac_c']
-
-            filestr+=dc_table[category]
-            filestr+=int2VLI(dc[b, c])
-
-            for i in range(len(symbols)):
-                filestr+=ac_table[tuple(symbols[i])]
-                filestr+=int2VLI(values[i])
-
-    try:
-        f = open(filepath, 'w')
-    except FileNotFoundError as e:
-        raise FileNotFoundError(
-                "No such directory: {}".format(
-                    os.path.dirname(filepath))) from e
-    f.write(filestr)
-    return len(filestr)
-
-def main(inputfile):    
+def main(inputfile, outpath='./img.dat', tempoutpath='./out.png'):    
     img_bgr = cv2.imread(inputfile)
     img = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2YCrCb)
 
@@ -109,11 +42,15 @@ def main(inputfile):
             block_index += 1
 
     dec_img_bgr = cv2.cvtColor(dec_img, cv2.COLOR_YCrCb2BGR)
-    cv2.imwrite('./out.png', dec_img_bgr)
+    cv2.imwrite(tempoutpath, dec_img_bgr)
 
     for i in range(n_blocks-1, 0, -1):
         dc[i] -= dc[i-1]
     
+    # dc: length of VLI, VLI
+    # ac: (run length of zero, length of VLI), VLI
+    # the former stored in hummfan code
+
     def flatten(lst):
         return [x for sublist in lst for x in sublist]
     
@@ -130,7 +67,7 @@ def main(inputfile):
               'dc_c': H_DC_C.value_to_bitstring_table(),
               'ac_c': H_AC_C.value_to_bitstring_table()}
     
-    res_size = writefile(dc, ac, n_blocks, tables) / 8 / 8 / 1024
+    res_size = JpegIO.writefile(dc, ac, n_blocks, tables, n_rows, n_cols, outpath) / 8 / 8 / 1024
 
     psnr = skimage.measure.compare_psnr(img_bgr, dec_img_bgr, data_range=255)
     ssim = skimage.measure.compare_ssim(img_bgr, dec_img_bgr, data_range=255, multichannel=True)
@@ -138,18 +75,10 @@ def main(inputfile):
     orig_size = n_rows * n_cols * 3 / 1024
     
     print('The size of the original image is %.2lf KB'%(orig_size))
-    print('The size of the result image is %d KB'%(res_size))
+    print('The size of the result image is %.2lf KB'%(res_size))
     print("PSNR : %lfdB"%(psnr))
     print("MS-SSIM : %lf"%(ssim))
     print("Rate : %lfbpp"%(res_size / orig_size * 8))
-    # print("Compression Ratio : %lf%%"%(res_size / orig_size * 100))
-
-    
-    # std_jpeg = cv2.imread('./lenna.jpg')
-    # std_psnr = skimage.measure.compare_psnr(img_bgr, std_jpeg, data_range=255)
-    # std_ssim = skimage.measure.compare_ssim(img_bgr, std_jpeg, data_range=255, multichannel=True)
-    # print("std PSNR : %lfdB"%(std_psnr))
-    # print("std SSIM : %lf"%(std_ssim))
 
 if __name__ == "__main__":
     fire.Fire(main)
