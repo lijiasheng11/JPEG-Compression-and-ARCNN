@@ -20,11 +20,11 @@ Implementation of JPEG is located at `JPEG_python`. Pipeline for JPEG basic syst
 ```bash
 cd JPEG_python
 python encoder.py --inpath='./lenna.png'  \
-				  --outpath='./lenna.dat' \
-				  --tempoutpath='./tmp.png'
+                  --outpath='./lenna.dat' \
+                  --tempoutpath='./tmp.png'
 
 python decoder.py --inpath='./lenna.dat' \
-				  --outpath='./lenna_decoded.png'
+                  --outpath='./lenna_decoded.png'
 ```
 
 For convenience, compressed Codes will be stored in`lenna.dat`  in the format of 01 string, thus it takes roughly eight times more space than binary storage. 
@@ -35,7 +35,7 @@ Implementation of [Artifacts Reduction Convolutional neural network(ARCNN)][ARCN
 
 ### Usage
 
-As compressing images into jpeg format is time consuming, we recompress images every `n_cycles`.
+As compressing images into jpeg format is time consuming, we recompress images every `n_cycles` epochs.
 
 #### train
 
