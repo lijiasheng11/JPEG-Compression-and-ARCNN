@@ -1,6 +1,6 @@
 # JPEG-Compression-and-ARCNN
 
-This repository is implementation of JPEG basic system, enhancement filters and "Deep Convolution Networks for Compression Artifacts Reduction".
+This repository is implementation of JPEG basic system, enhancement filters and ["Deep Convolution Networks for Compression Artifacts Reduction"][ARCNN].
 
 
 
@@ -31,7 +31,7 @@ python decoder.py --inpath='./lenna.dat' \
 
 For convenience, compressed Codes will be stored in`lenna.dat`  in the format of 01 string, thus it takes roughly eight times more space than binary storage. 
 
-## References
+
 
 [ARCNN]: http://mmlab.ie.cuhk.edu.hk/projects/ARCNN.html	"Deep Convolution Networks for Compression"
 
