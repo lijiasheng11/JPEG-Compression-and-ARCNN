@@ -41,8 +41,8 @@ As compressing images into jpeg format is time consuming, we recompress images e
 
 ```bash
 usage: main.py [-h] 
-	[--arch ARCH] 
-	[--images_dir IMAGES_DIR]
+    [--arch ARCH]
+    [--images_dir IMAGES_DIR]
     [--jpeg_quality JPEG_QUALITY] [--patch_size PATCH_SIZE]
     [--batch_size BATCH_SIZE]
     [--num_epochs NUM_EPOCHS]
@@ -77,10 +77,10 @@ optional arguments:
 
 ```bash
 usage: eval.py [-h] 
-	--arch ARCH 
-	--weights_path WEIGHTS_PATH 
-	--image_path IMAGE_PATH 
-	--outputs_dir OUTPUTS_DIR
+    --arch ARCH 
+    --weights_path WEIGHTS_PATH 
+    --image_path IMAGE_PATH 
+    --outputs_dir OUTPUTS_DIR
     [--jpeg_quality JPEG_QUALITY]
 
 optional arguments:
@@ -98,5 +98,5 @@ optional arguments:
 
 
 
-[ARCNN]: http://mmlab.ie.cuhk.edu.hk/projects/ARCNN.html	"Deep Convolution Networks for Compression"
+[ARCNN]: http://mmlab.ie.cuhk.edu.hk/projects/ARCNN.html    "Deep Convolution Networks for Compression"
 
